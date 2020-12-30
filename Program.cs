@@ -34,7 +34,7 @@ namespace NetTwitter
             
             //set the filepath to the output of the console.
             var filePath = "";
-            var fileName = "TweetList.txt";
+            var fileName = "TweetList.json";
             var fullPath = filePath + fileName;
 
             if (File.Exists(Path.Combine(filePath, fileName)))
@@ -45,13 +45,12 @@ namespace NetTwitter
 
             try
             {
-
                 fileStream = new FileStream(fullPath, FileMode.OpenOrCreate, FileAccess.Write);
                 writer = new StreamWriter(fileStream);
             }
             catch(Exception e)
             {
-                Console.WriteLine("Cannot open TweetList.txt for writing");
+                Console.WriteLine("Cannot open TweetList.json for writing");
                 Console.WriteLine(e.Message);
                 return;
             }
@@ -59,16 +58,9 @@ namespace NetTwitter
             Console.SetOut(writer);
 
             var twitterCtx = new TwitterContext(auth);
-            Console.WriteLine("Gathering tweets from Donald Trump");
-            Console.WriteLine("TimeStamp: " + DateTime.Now);
             
-            await GetTweets.ShowUserDetailsAsync(twitterCtx);
-            
-            await GetTweets.RunUserTimelineQueryAsync(twitterCtx);
-            
-            await GetTweets.RunHomeTimelineQueryAsync(twitterCtx);
-
-
+            await GetTweets.GetTwitterJson(twitterCtx);
+                
             Console.SetOut(oldConsole);
 
             writer.Close();

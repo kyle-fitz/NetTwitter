@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using LinqToTwitter;
@@ -11,8 +10,10 @@ using System.Text.RegularExpressions;
 
 namespace NetTwitter
 {
+    
     public class GetTweets
     {
+        const string UserName = "realDonalTrump";
         static void PrintCleanTweetsofHyperLink(List<Status> tweets)
         {
 
@@ -55,7 +56,7 @@ namespace NetTwitter
                 (from tweet in twitterCtx.Status
                  where tweet.TweetMode == TweetMode.Extended &&
                         tweet.Type == StatusType.User &&
-                       tweet.ScreenName == "realDonaldTrump"
+                       tweet.ScreenName == UserName
                  select tweet)
                 .ToListAsync();
 
@@ -90,7 +91,7 @@ namespace NetTwitter
                 await
                 (from tweet in twitterCtx.User
                  where tweet.Type == UserType.Show &&
-                       tweet.ScreenName == "realDonaldTrump"
+                       tweet.ScreenName == UserName
                  select tweet)
                 .SingleOrDefaultAsync();
 
@@ -109,7 +110,7 @@ namespace NetTwitter
         //Returns raw data searching for unencodedStatus
         public static async Task PerformSearchRawAsync(TwitterContext twitterCtx)
         {
-            string unencodedStatus = "realDonaldTrump";
+            string unencodedStatus = UserName;
             string encodedStatus = Uri.EscapeDataString(unencodedStatus);
             string queryString = "search/tweets.json?q=" + encodedStatus;
 
@@ -133,8 +134,25 @@ namespace NetTwitter
                  where tweet.Type == StatusType.Home
                  select tweet)
                 .ToListAsync();
-
+                
             PrintTweetsResults(tweets);
         }
+
+        public static async Task GetTwitterJson(TwitterContext twitterCtx)
+        {
+            string unencodedStatus = UserName;
+            string encodedStatus = Uri.EscapeDataString(unencodedStatus);
+            string queryString = "search/tweets.json?q=" + encodedStatus;
+
+            var rawResult =
+                await
+                    (from raw in twitterCtx.RawQuery
+                        where raw.QueryString == queryString
+                        select raw)
+                    .SingleOrDefaultAsync();
+
+            if (rawResult != null)
+                Console.WriteLine(rawResult.Response); 
+        }  
     }
 }
