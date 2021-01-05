@@ -59,7 +59,7 @@ namespace NetTwitter
 
             var twitterCtx = new TwitterContext(auth);
             
-            await GetTweets.GetTwitterJson(twitterCtx);
+            await GetTweets.PerformSearchRawAsync(twitterCtx);
                 
             Console.SetOut(oldConsole);
 

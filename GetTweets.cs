@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using LinqToTwitter;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json.Linq;
 
 namespace NetTwitter
 {
@@ -122,8 +123,7 @@ namespace NetTwitter
                 .SingleOrDefaultAsync();
 
             if (rawResult != null)
-                Console.WriteLine(
-                    "Response from Twitter: \n\n" + rawResult.Response);
+                Console.WriteLine(JToken.Parse(rawResult.Response).ToString(Newtonsoft.Json.Formatting.Indented));
         }
 
         public static async Task RunHomeTimelineQueryAsync(TwitterContext twitterCtx)
@@ -136,23 +136,7 @@ namespace NetTwitter
                 .ToListAsync();
                 
             PrintTweetsResults(tweets);
+            
         }
-
-        public static async Task GetTwitterJson(TwitterContext twitterCtx)
-        {
-            string unencodedStatus = UserName;
-            string encodedStatus = Uri.EscapeDataString(unencodedStatus);
-            string queryString = "search/tweets.json?q=" + encodedStatus;
-
-            var rawResult =
-                await
-                    (from raw in twitterCtx.RawQuery
-                        where raw.QueryString == queryString
-                        select raw)
-                    .SingleOrDefaultAsync();
-
-            if (rawResult != null)
-                Console.WriteLine(rawResult.Response); 
-        }  
     }
 }
