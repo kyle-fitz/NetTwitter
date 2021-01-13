@@ -1,21 +1,16 @@
+using System.Collections.Generic;
+
 namespace NetTwitter.Classes
 {
     public class RawTweet
     {
-        private string _type;
+        public string type { get; set; }
 
-        public string Type
+        public string text { get; set; }
+        
+        public class RootRawTweet
         {
-            get => _type;
-            set => _type = value;
-        }
-
-        private string _text;
-
-        public string Text
-        {
-            get => _text;
-            set => _text = value;
+            public List<RawTweet> data { get; set; }
         }
     }
 }
