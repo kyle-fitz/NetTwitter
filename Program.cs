@@ -23,6 +23,7 @@ namespace NetTwitter
                     ConsumerSecret = ConfigurationSettings.AppSettings["consumerSecret"],
                     OAuthToken = ConfigurationSettings.AppSettings["accessToken"],
                     OAuthTokenSecret = ConfigurationSettings.AppSettings["accessTokenSecret"]
+                    
                 }
 
             };
@@ -31,15 +32,14 @@ namespace NetTwitter
             FileStream fileStream;
             StreamWriter writer;
             TextWriter oldConsole = Console.Out;
-            
-            //set the filepath to the output of the console.
-            var filePath = "";
-            var fileName = "TweetList.json";
-            var fullPath = filePath + fileName;
 
-            if (File.Exists(Path.Combine(filePath, fileName)))
+            var filePath = ConfigurationSettings.AppSettings["JsonFilePath"];
+            
+            var fullPath = filePath;
+
+            if (File.Exists(filePath))
             {
-                File.Delete(Path.Combine(filePath, fileName));
+                File.Delete(filePath);
                 Console.WriteLine("File Deleted... Preparing output file...");
             }
 
@@ -59,8 +59,10 @@ namespace NetTwitter
 
             var twitterCtx = new TwitterContext(auth);
             
-            await GetTweets.PerformSearchRawAsync(twitterCtx);
-                
+            // await GetTweets.PerformSearchRawAsync(twitterCtx);
+            // await GetTweets.PerformRecentSearchRawAsync(twitterCtx);
+            await GetTweets.PerformUserStatusRawAsync(twitterCtx);
+            
             Console.SetOut(oldConsole);
 
             writer.Close();
