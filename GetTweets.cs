@@ -121,7 +121,7 @@ namespace NetTwitter
                 Console.WriteLine(JToken.Parse(rawResult.Response).ToString(Newtonsoft.Json.Formatting.Indented));
         }
         
-        public static async Task PerformRecentSearchRawAsync(TwitterContext twitterCtx)
+        public static async Task PerformUserSearchRawAsync(TwitterContext twitterCtx)
         {
             _ = twitterCtx ?? throw new ArgumentNullException(nameof(twitterCtx));
 

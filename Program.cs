@@ -60,8 +60,8 @@ namespace NetTwitter
             var twitterCtx = new TwitterContext(auth);
             
             // await GetTweets.PerformSearchRawAsync(twitterCtx);
-            // await GetTweets.PerformRecentSearchRawAsync(twitterCtx);
-            await GetTweets.PerformUserStatusRawAsync(twitterCtx);
+            await GetTweets.PerformUserSearchRawAsync(twitterCtx);
+            // await GetTweets.PerformUserStatusRawAsync(twitterCtx);
             
             Console.SetOut(oldConsole);
 
