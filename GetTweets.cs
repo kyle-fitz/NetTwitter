@@ -1,9 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using LinqToTwitter;
 using System.Text.RegularExpressions;
@@ -13,8 +10,9 @@ namespace NetTwitter
 {
     
     public class GetTweets
-    {
-        const string UserName = "realDonalTrump";
+    { 
+        const string SearchableString = "17995040";
+        // const string SearchableString = "benshapiro";
         static void PrintCleanTweetsofHyperLink(List<Status> tweets)
         {
 
@@ -48,8 +46,7 @@ namespace NetTwitter
                             "Username: {0} && Tweet: {1}", tweet.User.ScreenNameResponse, tweet.Text);
                 });
         }
-
-        //Donald Trump tweets to list 
+        
         public static async Task RunUserTimelineQueryAsync(TwitterContext twitterCtx)
         {
             var tweets =
@@ -57,15 +54,14 @@ namespace NetTwitter
                 (from tweet in twitterCtx.Status
                  where tweet.TweetMode == TweetMode.Extended &&
                         tweet.Type == StatusType.User &&
-                       tweet.ScreenName == UserName
+                       tweet.ScreenName == SearchableString
                  select tweet)
                 .ToListAsync();
 
             PrintCleanTweetsofHyperLink(tweets);
             //PrintTweetsResults(tweets);
         }
-
-        //Search for Donald Trump -- Could be useful for searching for hot words.
+        
         public static async Task NewAsyncReturnSearch(TwitterContext twitterCtx)
         {
 
@@ -73,7 +69,7 @@ namespace NetTwitter
                 await
                 (from search in twitterCtx.Search
                  where search.Type == SearchType.Search &&
-                       search.Query == "\"Donald Trump\""
+                       search.Query == "\"Ben Shapiro\""
                  select search)
                 .SingleOrDefaultAsync();
 
@@ -84,15 +80,14 @@ namespace NetTwitter
                         tweet.User.ScreenNameResponse,
                         tweet.Text));
         }
-
-        //Donald Trump last Tweet 
+        
         public static async Task ShowUserDetailsAsync(TwitterContext twitterCtx)
         {
             var user =
                 await
                 (from tweet in twitterCtx.User
                  where tweet.Type == UserType.Show &&
-                       tweet.ScreenName == UserName
+                       tweet.ScreenName == SearchableString
                  select tweet)
                 .SingleOrDefaultAsync();
 
@@ -108,13 +103,13 @@ namespace NetTwitter
             }
         }
 
-        //Returns raw data searching for unencodedStatus
+        //Returns raw json 
         public static async Task PerformSearchRawAsync(TwitterContext twitterCtx)
         {
-            string unencodedStatus = UserName;
+            string unencodedStatus = SearchableString;
             string encodedStatus = Uri.EscapeDataString(unencodedStatus);
             string queryString = "search/tweets.json?q=" + encodedStatus;
-
+            
             var rawResult =
                 await
                 (from raw in twitterCtx.RawQuery
@@ -125,18 +120,57 @@ namespace NetTwitter
             if (rawResult != null)
                 Console.WriteLine(JToken.Parse(rawResult.Response).ToString(Newtonsoft.Json.Formatting.Indented));
         }
-
-        public static async Task RunHomeTimelineQueryAsync(TwitterContext twitterCtx)
+        
+        public static async Task PerformRecentSearchRawAsync(TwitterContext twitterCtx)
         {
-            var tweets =
-                await
-                (from tweet in twitterCtx.Status
-                 where tweet.Type == StatusType.Home
-                 select tweet)
-                .ToListAsync();
-                
-            PrintTweetsResults(tweets);
+            _ = twitterCtx ?? throw new ArgumentNullException(nameof(twitterCtx));
+
+            string unencodedStatus = SearchableString;
+            string encodedStatus = Uri.EscapeDataString(unencodedStatus);
+            string queryString = "users/" + encodedStatus +
+                                 "/tweets?tweet.fields=created_at&expansions=author_id&user.fields=created_at&exclude=retweets&max_results=100";
             
+            string previousBaseUrl = twitterCtx.BaseUrl;
+            twitterCtx.BaseUrl = "https://api.twitter.com/2/";
+
+            var rawResult =
+                await
+                    (from raw in twitterCtx.RawQuery
+                        where raw.QueryString == queryString
+                        select raw)
+                    .SingleOrDefaultAsync();
+
+            if (rawResult != null)
+                Console.WriteLine(
+                    JToken.Parse(rawResult.Response).ToString(Newtonsoft.Json.Formatting.Indented));
+
+            twitterCtx.BaseUrl = previousBaseUrl;
         }
+        
+        public static async Task PerformUserStatusRawAsync(TwitterContext twitterCtx)
+        {
+            _ = twitterCtx ?? throw new ArgumentNullException(nameof(twitterCtx));
+
+            string unencodedStatus = SearchableString;
+            string encodedStatus = Uri.EscapeDataString(unencodedStatus);
+            string queryString = "statuses/user_timeline.json?screen_name=" + encodedStatus;
+            
+            string previousBaseUrl = twitterCtx.BaseUrl;
+            twitterCtx.BaseUrl = "https://api.twitter.com/1.1/";
+
+            var rawResult =
+                await
+                    (from raw in twitterCtx.RawQuery
+                        where raw.QueryString == queryString
+                        select raw)
+                    .SingleOrDefaultAsync();
+
+            if (rawResult != null)
+                Console.WriteLine(
+                    JToken.Parse(rawResult.Response).ToString(Newtonsoft.Json.Formatting.Indented));
+
+            twitterCtx.BaseUrl = previousBaseUrl;
+        }
+        
     }
 }
